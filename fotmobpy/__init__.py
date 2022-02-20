@@ -1,1 +1,1 @@
-from matches import *
+from fotmobpy.matches import *
