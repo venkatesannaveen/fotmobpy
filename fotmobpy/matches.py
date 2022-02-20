@@ -1,9 +1,72 @@
 import pandas as pd
 import requests
 
-def get_all_matches(date):
-	return
+MATCH_URL = "https://www.fotmob.com/matches?date="
 
-def get_team_matches(date):
-	return
+def get_all_matches(date: str) -> pd.DataFrame:
+	r = requests.get(MATCH_URL + date).json()
+	matches = []
+
+	for league in r["leagues"]:
+		for match in league["matches"]:
+			matches.append(
+				{
+					"id": match["id"], 
+					"country": league["ccode"],
+					"league": league["name"],
+					"home_id": match["home"]["id"],
+					"home_name": match["home"]["longName"],
+					"away_id": match["away"]["id"],
+					"away_name": match["away"]["longName"]
+				}
+			)
 	
+	return pd.DataFrame(matches)
+
+
+def get_team_matches(date: str, team: str) -> pd.DataFrame:
+	team = team.lower()
+	r = requests.get(MATCH_URL + date).json()
+	matches = []
+
+	for league in r["leagues"]:
+		for match in league["matches"]:
+			if match["home"]["longName"].lower() == team or match["away"]["longName"].lower() == team:
+				matches.append(
+					{
+						"id": match["id"], 
+						"country": league["ccode"],
+						"league": league["name"],
+						"home_id": match["home"]["id"],
+						"home_name": match["home"]["longName"],
+						"away_id": match["away"]["id"],
+						"away_name": match["away"]["longName"]
+					}
+				)
+	
+	return pd.DataFrame(matches)
+
+
+def get_league_matches(date: str, country: str, league_name: str=None) -> pd.DataFrame:
+	country = country.lower()
+	r = requests.get(MATCH_URL + date).json()
+	matches = []
+
+	for league in r["leagues"]:
+		if league["ccode"].lower() == country:
+			for match in league["matches"]:
+				if league_name is not None and league["name"].lower() != league_name.lower():
+					continue
+				matches.append(
+					{
+						"id": match["id"],
+						"country": league["ccode"],
+						"league": league["name"],
+						"home_id": match["home"]["id"],
+						"home_name": match["home"]["longName"],
+						"away_id": match["away"]["id"],
+						"away_name": match["away"]["longName"]
+					}
+				)
+
+	return pd.DataFrame(matches)
