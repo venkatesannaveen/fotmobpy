@@ -15,7 +15,12 @@ def get_league_ids(country: str=None, league: str=None) -> pd.DataFrame:
     return df
 
 def get_league_table(league_id: int) -> pd.DataFrame:
-    r = requests.get(LEAGUES_URL + str(league_id)).json()
+    r = requests.get(LEAGUES_URL + str(league_id))
+    r.raise_for_status()
+
+    r = r.json()
+    if r["tableData"] is None:
+        raise Exception(f"Invalid league ID {r['details']['id']}")
     table = []
     for team in r["tableData"][0]["table"]["all"]:
         table.append(
