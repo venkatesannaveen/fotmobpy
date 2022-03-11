@@ -4,7 +4,12 @@ import requests
 MATCH_URL = "https://www.fotmob.com/matches?date="
 
 def get_all_matches(date: str) -> pd.DataFrame:
-	r = requests.get(MATCH_URL + date).json()
+	r = requests.get(MATCH_URL + date)
+	r.raise_for_status()
+
+	r = r.json()
+	if "error" in r.keys():
+		raise Exception(f"{r['message']} on {r['date']} - make sure date format is YYYYMMDD")
 	matches = []
 
 	for league in r["leagues"]:
@@ -29,8 +34,13 @@ def get_all_matches(date: str) -> pd.DataFrame:
 
 
 def get_team_matches(date: str, team: str) -> pd.DataFrame:
+	r = requests.get(MATCH_URL + date)
+	r.raise_for_status()
+
+	r = r.json()
+	if "error" in r.keys():
+		raise Exception(f"{r['message']} on {r['date']} - make sure date format is YYYYMMDD")
 	team = team.lower()
-	r = requests.get(MATCH_URL + date).json()
 	matches = []
 
 	for league in r["leagues"]:
@@ -56,8 +66,13 @@ def get_team_matches(date: str, team: str) -> pd.DataFrame:
 
 
 def get_league_matches(date: str, country: str, league_name: str=None) -> pd.DataFrame:
+	r = requests.get(MATCH_URL + date)
+	r.raise_for_status()
+
+	r = r.json()
+	if "error" in r.keys():
+		raise Exception(f"{r['message']} on {r['date']} - make sure date format is YYYYMMDD")	
 	country = country.lower()
-	r = requests.get(MATCH_URL + date).json()
 	matches = []
 
 	for league in r["leagues"]:
